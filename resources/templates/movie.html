@@ -1,0 +1,22 @@
+{% extends "static-base.html" %}
+{% block title %}
+{{movie_title}}
+{% endblock %}
+{% block content %}
+
+<div id="movie-info row">
+  <div class="col-md-4">
+    <img src="{{movie_poster_main}}" class="img-responsive"/>
+  </div>
+  <div class="col-md-5">
+    <h4>{{movie_title}}</h4>
+    <p>{{movie_genre}} | {{movie_runtime}} | {{movie_box_office_us}}</p>
+    <p><h5>Plot</h5>{{movie_synopsis}}</p>
+    <p><b>Director: </b>{{movie_director}}</p>
+    <p><b>Actors: </b>{{movie_actors}}</p>
+    <p><b>Writers: </b>{{movie_writer}}</p>
+    <p><b>Rating</b><h5>{{movie_tomato_rating}}%</h5></p>
+  </div>
+</div>
+
+{% endblock %}
