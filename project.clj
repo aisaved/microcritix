@@ -35,6 +35,7 @@
                  [twitter-api "0.7.8"]
                  [clj-http "1.1.2"]
                  [cheshire "5.5.0"]
+                 [org.clojure/math.numeric-tower "0.0.4"]
                  
                  [org.clojure/clojurescript "0.0-3308" :scope "provided"]
                  [org.clojure/tools.reader "0.9.2"]

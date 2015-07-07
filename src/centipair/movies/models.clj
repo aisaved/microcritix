@@ -19,6 +19,29 @@
 
 (defentity movie)
 
+(defn round-places [number decimals]
+  (let [factor (expt 10 decimals)]
+    (bigdec (/ (round (* factor number)) factor))))
+
+(defn clean-ambrasand
+  [title]
+  (clojure.string/replace title #"&" "and")) 
+
+
+(defn clean-special-chars
+  [title]
+  (clojure.string/replace title #"[\\(\\)-/,:!$%^&*+. ]" ""))
+
+(defn add-hash
+  [title]
+  (str "#" title))
+
+
+(def title-hash (comp
+                 add-hash
+                 clojure.string/lower-case
+                 clean-special-chars
+                 clean-ambrasand))
 
 
 (defn get-movie-rt [rt-id]
@@ -70,11 +93,11 @@
                     :movie_poster_thumbnail
                     :movie_tomato_rating
                     :movie_url_slug)
-            (order [:movie_release_date_dvd :movie_tomato_rating] :DESC)
+            (order [:movie_release_date_dvd] :DESC)
             (offset (:offset offset-limit-params))
             (limit (:limit offset-limit-params)))))
 
 
 (defn search-movies
   [query]
-  (exec-raw ["SELECT movie_id,movie_title,movie_poster_thumbnail,movie_tomato_rating,movie_url_slug FROM movie WHERE movie_title ILIKE ? ORDER BY movie_release_date_dvd,movie_tomato_rating ;" [(str "%" query "%")]] :results))
+  (exec-raw ["SELECT movie_id,movie_title,movie_poster_thumbnail,movie_tomato_rating,movie_url_slug FROM movie WHERE movie_title ILIKE ? ORDER BY movie_release_date_dvd,movie_tomato_rating limit 100;" [(str "%" query "%")]] :results))

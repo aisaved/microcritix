@@ -7,7 +7,7 @@
 
 
 
-(def movie-list-data (reagent/atom {:page 1
+(def movie-list-data (reagent/atom {:page 0
                                     :limit 30
                                     :data []
                                     :load-more "block"}))
