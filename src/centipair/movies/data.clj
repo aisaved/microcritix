@@ -3,7 +3,9 @@
               [taoensso.timbre :as timbre]
               [cheshire.core :refer [parse-string]]
               [centipair.movies.models :refer [create-movie
-                                               update-release-dates]]
+                                               update-release-dates
+                                               microcritix-rating
+                                               title-hash]]
               [slugger.core :as slugger]
               [clojure.core.async
                :as a
@@ -87,7 +89,10 @@
    :movie_box_office_us (:BoxOffice omdb-movie)
    :movie_actors (:Actors omdb-movie)
    :movie_tomato_rating (:tomatoScore rt-movie)
-   :movie_url_slug (slugger/->slug (:title rt-movie))})
+   :movie_url_slug (slugger/->slug (:title rt-movie))
+   :movie_microcritix_rating (microcritix-rating (:tomatoScore rt-movie))
+   :movie_hash_tag (title-hash (:title rt-movie))
+   })
 
 
 

@@ -21,7 +21,9 @@
   []
   (doseq [each (select movie-models/movie)]
     (korma/update movie-models/movie 
-                  (set-fields {:movie_url_slug (slugger/->slug (:movie_title each))})
+                  (set-fields {:movie_url_slug
+                               (slugger/->slug
+                                (:movie_title each))})
                   (where {:movie_id (:movie_id each)}))))
 
 
@@ -31,5 +33,18 @@
   []
   (doseq [each (select movie-models/movie)]
     (korma/update movie-models/movie 
-                  (set-fields {:movie_hash_tag (movie-models/title-hash (:movie_title each))})
+                  (set-fields {:movie_hash_tag 
+                               (movie-models/title-hash
+                                (:movie_title each))})
+                  (where {:movie_id (:movie_id each)}))))
+
+
+(defn update-movie-rating
+  []
+  (doseq [each (select movie-models/movie)]
+    
+    (korma/update movie-models/movie 
+                  (set-fields {:movie_microcritix_rating 
+                               (movie-models/microcritix-rating
+                                (if (nil? (:movie_tomato_rating each)) 0 (:movie_tomato_rating each)))})
                   (where {:movie_id (:movie_id each)}))))

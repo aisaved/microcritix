@@ -3,6 +3,7 @@
         centipair.core.db.connection)
   (:require [centipair.core.contrib.time :as time]
             [centipair.core.utilities.pagination :as pagination]
+            [clojure.math.numeric-tower :as math]
             [korma.core :as korma :refer [insert
                                           delete
                                           select
@@ -20,17 +21,31 @@
 (defentity movie)
 
 (defn round-places [number decimals]
-  (let [factor (expt 10 decimals)]
-    (bigdec (/ (round (* factor number)) factor))))
+  (let [factor (math/expt 10 decimals)]
+    (bigdec (/ (math/round (* factor number)) factor))))
+
+
+(defn microcritix-rating
+  "conversts tomato ratingto microcritix rating"
+  [tomato-rating]
+  (if (nil? tomato-rating)
+    (println "null")
+    (println (round-places (/ tomato-rating 10) 1)))
+  
+  (if (nil? tomato-rating)
+    0
+    (round-places (/ tomato-rating 10) 1)))
+
 
 (defn clean-ambrasand
+  "replaces amprasands to 'and'"
   [title]
   (clojure.string/replace title #"&" "and")) 
 
 
 (defn clean-special-chars
   [title]
-  (clojure.string/replace title #"[\\(\\)-/,:!$%^&*+. ]" ""))
+  (clojure.string/replace title #"[\\(\\)'-/,:!$%^&*+. ]" ""))
 
 (defn add-hash
   [title]
