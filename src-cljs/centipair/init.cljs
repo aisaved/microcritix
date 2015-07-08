@@ -9,7 +9,7 @@
 (defn ^:export init! []
   (do
     (notifier/render-notifier-component)
-    (render-movie-list)
+    ;;(render-movie-list)
     ;;(csrf/fetch-csrf-token)
     ;;(render-components)
     ))

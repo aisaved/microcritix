@@ -18,6 +18,7 @@
 
 
 (defn update-movie-url-slug
+  "Done"
   []
   (doseq [each (select movie-models/movie)]
     (korma/update movie-models/movie 

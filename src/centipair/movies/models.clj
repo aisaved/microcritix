@@ -29,10 +29,6 @@
   "conversts tomato ratingto microcritix rating"
   [tomato-rating]
   (if (nil? tomato-rating)
-    (println "null")
-    (println (round-places (/ tomato-rating 10) 1)))
-  
-  (if (nil? tomato-rating)
     0
     (round-places (/ tomato-rating 10) 1)))
 
