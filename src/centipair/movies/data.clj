@@ -91,8 +91,7 @@
    :movie_tomato_rating (:tomatoScore rt-movie)
    :movie_url_slug (slugger/->slug (:title rt-movie))
    :movie_microcritix_rating (microcritix-rating (:tomatoScore rt-movie))
-   :movie_hash_tag (title-hash (:title rt-movie))
-   })
+   :movie_hash_tag (title-hash (:title rt-movie))})
 
 
 

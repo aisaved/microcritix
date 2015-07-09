@@ -127,33 +127,40 @@
   (let [deleted-rating (delete movie_tweet 
                                (where {:movie_id movie-id
                                        :movie_tweet_user_id twitter-user-id}))]
-    (println deleted-rating)
     (if (> deleted-rating 0)
       true
       false)))
 
 
-(defn inc-user-rating-count
-  [movie-data]
-  (korma/update movie 
-                (set-fields 
-                 {:movie_rating_user_count (inc (:movie_rating_user_count movie-data))})
-                (where {:movie_id (:movie_id movie-data)})))
+(defn rating-exists? 
+  [tweet-params]
+  (let [rating-data (select movie_tweet (where {:movie_tweet_twitter_id (:tweet-id tweet-params)}))]
+    (if (empty? rating-data)
+      false
+      true)))
+
+
+(defn update-user-rating
+  [movie-data rating]
+  (let [movie-ratings (select movie_tweet
+                              (fields :movie_tweet_id :movie_tweet_rating)
+                              (where {:movie_id (:movie_id movie-data)}))
+        ratings-count (if (> (:movie_microcritix_rating movie-data) 0) (inc (count movie-ratings)) (count movie-ratings))
+        total-rating (reduce (fn [previous next] (+ previous (:movie_tweet_rating next))) 0 movie-ratings)
+        new-rating (round-places (/ total-rating ratings-count) 1)]
+    (korma/update movie (set-fields {:movie_microcritix_rating new-rating}) (where {:movie_id (:movie_id movie-data)}))))
 
 
 (defn save-tweet
   [tweet-params]
   (let [movie-data (get-movie-from-hash (:hash-tags tweet-params))]
-    (if (nil? movie-data)
+    (if (or (nil? movie-data) (> (:rating tweet-params) 10) (rating-exists? tweet-params))
       nil
       (do
-        (let [deleted? (delete-rating (:movie_id movie-data) (:user-id tweet-params))]
-          (insert movie_tweet (values {:movie_id (:movie_id movie-data)
-                                       :movie_tweet_rating (:rating tweet-params)
-                                       :movie_tweet_user_id (:user-id tweet-params)
-                                       :movie_tweet_twitter_id (:tweet-id tweet-params)
-                                       :movie_tweet_text (:tweet-text tweet-params)
-                                       }))
-          (println deleted?)
-          (if (not deleted?)
-            (inc-user-rating-count movie-data)))))))
+        (delete-rating (:movie_id movie-data) (:user-id tweet-params))
+        (insert movie_tweet (values {:movie_id (:movie_id movie-data)
+                                     :movie_tweet_rating (:rating tweet-params)
+                                     :movie_tweet_user_id (:user-id tweet-params)
+                                     :movie_tweet_twitter_id (:tweet-id tweet-params)
+                                     :movie_tweet_text (:tweet-text tweet-params)}))
+        (update-user-rating movie-data (:rating tweet-params))))))
