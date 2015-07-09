@@ -12,6 +12,7 @@
    [cheshire.core :refer [parse-string]]
    [clojure.data.json :as json]
    [clojure.java.io :as io]
+   [centipair.movies.models :refer [save-tweet]]
    )
   (:import
    (twitter.callbacks.protocols AsyncStreamingCallback)))
@@ -25,56 +26,54 @@
                                 "Wr34fXd3nBGaVJMKmfDu8vtLe9rflg8syMBjdiphx8"))
 
 
+(defn hash-tag-parser
+  [tweet-text]
+  (filter
+   (fn [each] (not (= each "#rating")))
+   (into [] (re-seq  #"\B#\w*[a-zA-Z]+\w*" tweet-text))))
+
+
+(defn get-rating-value
+  [rating-text]
+  (if (nil? rating-text)
+    0
+    (let [rating-value (bigdec (clojure.string/replace rating-text #"#rating +" ""))]
+      (if (> rating-value 10)
+        (/ rating-value 10)
+        rating-value))))
+
+(defn rating-parser
+  [tweet-text]
+  (let [rating-text (first (re-find #"\B#rating +\d+(\.\d{1,2})?" tweet-text))]
+    (get-rating-value rating-text)))
+
+
+
+
+(defn process-tweet
+  [tweet]
+  (let [tweet-text (:text tweet)
+        tweet-params {:tweet-text (:text tweet)
+                      :hash-tags (hash-tag-parser tweet-text)
+                      :rating (rating-parser tweet-text)
+                      :tweet-id (:id tweet)
+                      :user-id (:id (:user tweet))}]
+    (println tweet-params)
+    (save-tweet tweet-params)))
+
 (defn get-mentions []
   (statuses-mentions-timeline :oauth-creds my-creds :params {:count 1}))
 
 
 (defn search [query]
-  (search-tweets :oauth-creds my-creds :params {:q query :count 1}))
+  (search-tweets :oauth-creds my-creds :params {:q query :count 200}))
 
 
 (defn search-mentions
   []
-  (let [tweet (search "@devasiajoseph")]
-    (println tweet)
-    ))
-
-
-(def temp (atom nil))
-
-(defn parse-tweet
-  [resp tweet]
-  (if (not (= tweet "\r\n"))
-    (println tweet)
-    ))
-
-
-(defn track-tweet [tracking]
-  (statuses-filter :params {:track tracking}
-                   :oauth-creds my-creds
-                   :callbacks (AsyncStreamingCallback. 
-                               (fn [resp tweet]
-                                 (parse-tweet resp (str tweet)))
-                               (comp println response-return-everything)
-                               exception-print)))
-
-
-(defn track-tweet-new []
-  (let [w (io/writer "mary.txt")
-      callback (AsyncStreamingCallback.
-                 (fn [_resp payload]
-                   (.write w (-> (str payload) json/read-json :text))
-                   (.write w "\n"))
-                 (fn [_resp]
-                   (.close w))
-                 (fn [_resp ex]
-                   (.close w)
-                   (.printStackTrace ex)))]
-  (statuses-filter
-    :params {:track "@devasiajoseph"}
-    :oauth-creds my-creds
-    :callbacks callback))
-  )
+  (let [tweets (search "@microcritix")]
+    (doseq [tweet (:statuses (:body tweets))] 
+      (process-tweet tweet))))
 
 
 (defn start-tweet-tracking

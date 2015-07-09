@@ -21,16 +21,19 @@ CREATE TABLE movie
   movie_url_slug character varying(1024),
   movie_microcritix_rating numeric(3,1),
   movie_hash_tag character varying(1024),
+  movie_rating_user_count integer NOT NULL DEFAULT 0,
   CONSTRAINT movie_pkey PRIMARY KEY (movie_id)
 );
 
 
 
 CREATE TABLE movie_tweet(
-       movie_tweet_id serial NOT NULL,
-       movie_tweet_twitter_id integer,
+       movie_tweet_id serial PRIMARY KEY,
        movie_id integer,
        movie_tweet_rating DECIMAL(3,1),
+       movie_tweet_user_id bigint,
+       movie_tweet_twitter_id bigint,
+       movie_tweet_text varchar(255),
        CONSTRAINT movie_tweet_movie_id_id_fkey FOREIGN KEY (movie_id)
        REFERENCES movie (movie_id) MATCH SIMPLE 
        ON DELETE CASCADE

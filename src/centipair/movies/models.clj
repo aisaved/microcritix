@@ -4,6 +4,7 @@
   (:require [centipair.core.contrib.time :as time]
             [centipair.core.utilities.pagination :as pagination]
             [clojure.math.numeric-tower :as math]
+            [taoensso.timbre :as timbre]
             [korma.core :as korma :refer [insert
                                           delete
                                           select
@@ -19,6 +20,7 @@
 
 
 (defentity movie)
+(defentity movie_tweet)
 
 (defn round-places [number decimals]
   (let [factor (math/expt 10 decimals)]
@@ -102,8 +104,9 @@
             (fields :movie_id
                     :movie_title
                     :movie_poster_thumbnail
-                    :movie_tomato_rating
-                    :movie_url_slug)
+                    :movie_microcritix_rating
+                    :movie_url_slug
+                    :movie_hash_tag)
             (order [:movie_release_date_dvd] :DESC)
             (offset (:offset offset-limit-params))
             (limit (:limit offset-limit-params)))))
@@ -112,3 +115,45 @@
 (defn search-movies
   [query]
   (exec-raw ["SELECT movie_id,movie_title,movie_poster_thumbnail,movie_tomato_rating,movie_url_slug FROM movie WHERE movie_title ILIKE ? ORDER BY movie_release_date_dvd,movie_tomato_rating limit 100;" [(str "%" query "%")]] :results))
+
+
+(defn get-movie-from-hash
+  [hashes]
+  (first 
+   (select movie (where {:movie_hash_tag (first hashes)}))))
+
+(defn delete-rating
+  [movie-id twitter-user-id]
+  (let [deleted-rating (delete movie_tweet 
+                               (where {:movie_id movie-id
+                                       :movie_tweet_user_id twitter-user-id}))]
+    (println deleted-rating)
+    (if (> deleted-rating 0)
+      true
+      false)))
+
+
+(defn inc-user-rating-count
+  [movie-data]
+  (korma/update movie 
+                (set-fields 
+                 {:movie_rating_user_count (inc (:movie_rating_user_count movie-data))})
+                (where {:movie_id (:movie_id movie-data)})))
+
+
+(defn save-tweet
+  [tweet-params]
+  (let [movie-data (get-movie-from-hash (:hash-tags tweet-params))]
+    (if (nil? movie-data)
+      nil
+      (do
+        (let [deleted? (delete-rating (:movie_id movie-data) (:user-id tweet-params))]
+          (insert movie_tweet (values {:movie_id (:movie_id movie-data)
+                                       :movie_tweet_rating (:rating tweet-params)
+                                       :movie_tweet_user_id (:user-id tweet-params)
+                                       :movie_tweet_twitter_id (:tweet-id tweet-params)
+                                       :movie_tweet_text (:tweet-text tweet-params)
+                                       }))
+          (println deleted?)
+          (if (not deleted?)
+            (inc-user-rating-count movie-data)))))))

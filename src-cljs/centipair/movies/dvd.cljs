@@ -61,11 +61,20 @@
     [:h6 {:id (str "movie-title-" (:movie_id movie))
           :key (str "movie-title-" (:movie_id movie))}
      (:movie_title movie)]
+    [:h6 {:id (str "movie-hash-" (:movie_id movie))
+          :key (str "movie-hash-" (:movie_id movie))}
+     [:i {:class "fa fa-twitter"
+          :key (str "movie-hash-icon" (:movie_id movie))}]
+     [:a {:target "_blank"
+          :href (str "https://twitter.com/intent/tweet"
+                     "?text=@microcritix " (:movie_title movie)
+                     "&hashtags=" (str (clojure.string/replace (:movie_hash_tag movie) #"#" "") ",rating"))}
+      (:movie_hash_tag movie)]]
     [:span
      {:id (str "movie-rating-" (:movie_id movie))
       :key (str "movie-rating-" (:movie_id movie))}
-     (if (v/has-value? (:movie_tomato_rating movie))
-       (str "Rating: " (:movie_tomato_rating movie) " %")
+     (if (v/has-value? (:movie_microcritix_rating movie))
+       (str "Rating: " (:movie_microcritix_rating movie))
        "")]
     ]])
 
@@ -130,5 +139,11 @@
   (swap! movie-list-data assoc :load-more "block")
   (fetch-movie-list)
   (ui/render movie-list "movie-list")
-  (ui/render search-form "search-form")
+  (ui/render search-form "search-form"))
+
+
+
+(defn render-tweets
+  []
+  
   )
