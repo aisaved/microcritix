@@ -40,14 +40,18 @@
                   (where {:movie_id (:movie_id each)}))))
 
 
+
+
 (defn update-movie-rating
   []
-  (doseq [each (select movie-models/movie)] 
-    (korma/update movie-models/movie 
-                  (set-fields {:movie_microcritix_rating 
-                               (movie-models/microcritix-rating
-                                (if (nil? (:movie_tomato_rating each))
+  (let [movies (select movie-models/movie)]
+    (doseq [each movies]
+      (let [tomato-rating (if (nil? (:movie_tomato_rating each))
                                   0 
-                                  (:movie_tomato_rating each)))
-                               :movie_rating_user_count (if (nil? (:movie_tomato_rating each)) 0 1)})
-                  (where {:movie_id (:movie_id each)}))))
+                                  (:movie_tomato_rating each))
+            rating (movie-models/microcritix-rating tomato-rating)]
+        (korma/update movie-models/movie
+                (set-fields {:movie_microcritix_rating rating
+                             :movie_rating rating
+                             })
+                (where {:movie_id (:movie_id each)}))))))

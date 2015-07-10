@@ -21,6 +21,7 @@ CREATE TABLE movie
   movie_url_slug character varying(1024),
   movie_microcritix_rating numeric(3,1),
   movie_hash_tag character varying(1024),
+  movie_rating decimal(3,1),
   CONSTRAINT movie_pkey PRIMARY KEY (movie_id)
 );
 

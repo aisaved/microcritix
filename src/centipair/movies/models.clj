@@ -104,7 +104,7 @@
             (fields :movie_id
                     :movie_title
                     :movie_poster_thumbnail
-                    :movie_microcritix_rating
+                    :movie_rating
                     :movie_url_slug
                     :movie_hash_tag)
             (order [:movie_release_date_dvd] :DESC)
@@ -145,14 +145,17 @@
   (let [movie-ratings (select movie_tweet
                               (fields :movie_tweet_id :movie_tweet_rating)
                               (where {:movie_id (:movie_id movie-data)}))
-        ratings-count (if (> (:movie_microcritix_rating movie-data) 0) (inc (count movie-ratings)) (count movie-ratings))
-        total-rating (reduce (fn [previous next] (+ previous (:movie_tweet_rating next))) 0 movie-ratings)
+        ratings-count (if (nil? (:movie_tomato_rating movie-data)) (count movie-ratings) (inc (count movie-ratings)) )
+        total-rating (+ (reduce (fn [previous next] (+ previous (:movie_tweet_rating next))) 0 movie-ratings) (:movie_microcritix_rating movie-data))
         new-rating (round-places (/ total-rating ratings-count) 1)]
-    (korma/update movie (set-fields {:movie_microcritix_rating new-rating}) (where {:movie_id (:movie_id movie-data)}))))
+    (println total-rating)
+    (println new-rating)
+    (korma/update movie (set-fields {:movie_rating new-rating}) (where {:movie_id (:movie_id movie-data)}))))
 
 
 (defn save-tweet
   [tweet-params]
+  (println tweet-params)
   (let [movie-data (get-movie-from-hash (:hash-tags tweet-params))]
     (if (or (nil? movie-data) (> (:rating tweet-params) 10) (rating-exists? tweet-params))
       nil

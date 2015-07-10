@@ -73,8 +73,8 @@
     [:span
      {:id (str "movie-rating-" (:movie_id movie))
       :key (str "movie-rating-" (:movie_id movie))}
-     (if (v/has-value? (:movie_microcritix_rating movie))
-       (str "Rating: " (:movie_microcritix_rating movie))
+     (if (v/has-value? (:movie_rating movie))
+       (str "Rating: " (:movie_rating movie))
        "")]
     ]])
 

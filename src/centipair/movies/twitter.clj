@@ -58,7 +58,6 @@
                       :rating (rating-parser tweet-text)
                       :tweet-id (:id tweet)
                       :user-id (:id (:user tweet))}]
-    (println tweet-params)
     (save-tweet tweet-params)))
 
 (defn get-mentions []
@@ -71,11 +70,9 @@
 
 (defn search-mentions
   []
-  (let [tweets (search "@microcritix")]
-    (doseq [tweet (:statuses (:body tweets))] 
-      (process-tweet tweet))))
+  (try 
+    (let [tweets (search "@microcritix")]
+      (doseq [tweet (:statuses (:body tweets))] 
+        (process-tweet tweet)))
+    (catch Exception e (str "Exception in twitter: " (.getMessage e)))))
 
-
-(defn start-tweet-tracking
-  []
-  (schedule search-mentions (every 5 :second)))
