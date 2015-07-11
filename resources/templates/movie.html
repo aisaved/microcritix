@@ -4,20 +4,44 @@
 {% endblock %}
 {% block content %}
 
-<div id="movie-info row">
+<div id="movie-info" class="row">
   <div class="col-md-4">
     <img src="{{movie_poster_main}}" class="img-responsive"/>
   </div>
   <div class="col-md-5">
     <h4>{{movie_title}}</h4>
+    <h5><a href="https://twitter.com/intent/tweet?text=@microcritix {{movie_title}}&hashtags={{movie_hash_tag}},rating">
+      <i class="fa fa-twitter"></i> #{{movie_hash_tag}}</a></h5>
     <p>{{movie_genre}} | {{movie_runtime}} | {{movie_box_office_us}}</p>
     <p><h5>Plot</h5>{{movie_synopsis}}</p>
     <p><b>Director: </b>{{movie_director}}</p>
     <p><b>Actors: </b>{{movie_actors}}</p>
     <p><b>Writers: </b>{{movie_writer}}</p>
-    <p><b>Rating</b><h5>{{movie_tomato_rating}}%</h5></p>
+    <p><b>Rating</b><h5>{{movie_rating}}</h5></p>
   </div>
 </div>
+
+
+{% for t in movie_tweets%}
+
+<div class="movie-tweets row">
+  <div class="tweet-container col-md-5 col-md-offset-4">
+    <div class="twitter-image-container">
+      <img src="{{t.movie_tweet_profile_image}}"/>
+    </div>
+    <div class="tweet-container">
+      <div class="twitter-screen-name">
+	<a href="https://twitter.com/intent/user?user_id={{t.movie_tweet_user_id}}" target="_blank">{{t.movie_tweet_screen_name}}</a>
+      </div>
+      <div class="twitter-text">
+	{{t.movie_tweet_text}}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+
 
 {% endblock %}
 

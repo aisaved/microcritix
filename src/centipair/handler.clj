@@ -58,7 +58,7 @@
   ;;start the expired session cleanup job
   (session/start-cleanup-job!)
   (core-init/init-system)
-   (start-scheduler)
+  (start-scheduler)
   (timbre/info (str
                  "\n-=[centipair started successfully"
                  (when (env :dev) "using the development profile")

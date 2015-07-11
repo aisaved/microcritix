@@ -34,6 +34,8 @@ CREATE TABLE movie_tweet(
        movie_tweet_user_id bigint,
        movie_tweet_twitter_id bigint,
        movie_tweet_text varchar(255),
+       movie_tweet_screen_name varchar(255),
+       movie_tweet_profile_image varchar(1024),
        CONSTRAINT movie_tweet_movie_id_id_fkey FOREIGN KEY (movie_id)
        REFERENCES movie (movie_id) MATCH SIMPLE 
        ON DELETE CASCADE

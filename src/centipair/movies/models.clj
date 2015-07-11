@@ -45,13 +45,8 @@
   [title]
   (clojure.string/replace title #"[\\(\\)'-/,:!$%^&*+. ]" ""))
 
-(defn add-hash
-  [title]
-  (str "#" title))
-
 
 (def title-hash (comp
-                 add-hash
                  clojure.string/lower-case
                  clean-special-chars
                  clean-ambrasand))
@@ -65,10 +60,17 @@
   (first (select movie (where {:movie_id (Integer. id)}))))
 
 
-(defn get-movie-url [id url-slug]
-  (let [movie-obj (get-movie id)]
+(defn get-movie-tweets
+  [movie-id]
+  (into [] (select movie_tweet (where {:movie_id (Integer. movie-id)}))))
+
+
+(defn get-movie-url
+  [id url-slug]
+  (let [movie-obj (get-movie id)
+        movie-tweets (get-movie-tweets id)]
     (if (= (:movie_url_slug movie-obj) url-slug)
-      movie-obj
+      (assoc movie-obj :movie_tweets movie-tweets) 
       nil)))
 
 
@@ -114,7 +116,7 @@
 
 (defn search-movies
   [query]
-  (exec-raw ["SELECT movie_id,movie_title,movie_poster_thumbnail,movie_tomato_rating,movie_url_slug FROM movie WHERE movie_title ILIKE ? ORDER BY movie_release_date_dvd,movie_tomato_rating limit 100;" [(str "%" query "%")]] :results))
+  (exec-raw ["SELECT movie_id,movie_title,movie_poster_thumbnail,movie_rating,movie_url_slug,movie_hash_tag FROM movie WHERE movie_title ILIKE ? ORDER BY movie_release_date_dvd,movie_tomato_rating limit 100;" [(str "%" query "%")]] :results))
 
 
 (defn get-movie-from-hash
@@ -148,8 +150,6 @@
         ratings-count (if (nil? (:movie_tomato_rating movie-data)) (count movie-ratings) (inc (count movie-ratings)) )
         total-rating (+ (reduce (fn [previous next] (+ previous (:movie_tweet_rating next))) 0 movie-ratings) (:movie_microcritix_rating movie-data))
         new-rating (round-places (/ total-rating ratings-count) 1)]
-    (println total-rating)
-    (println new-rating)
     (korma/update movie (set-fields {:movie_rating new-rating}) (where {:movie_id (:movie_id movie-data)}))))
 
 
@@ -165,5 +165,7 @@
                                      :movie_tweet_rating (:rating tweet-params)
                                      :movie_tweet_user_id (:user-id tweet-params)
                                      :movie_tweet_twitter_id (:tweet-id tweet-params)
-                                     :movie_tweet_text (:tweet-text tweet-params)}))
+                                     :movie_tweet_text (:tweet-text tweet-params)
+                                     :movie_tweet_screen_name (:screen-name tweet-params)
+                                     :movie_tweet_profile_image (:profile-image tweet-params)}))
         (update-user-rating movie-data (:rating tweet-params))))))

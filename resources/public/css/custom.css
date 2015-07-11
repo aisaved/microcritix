@@ -94,3 +94,16 @@
 .search-container{
     margin-bottom:20px;
 }
+
+
+.movie-tweets{
+    margin-top:10px;
+}
+.twitter-image-container{
+    float:left;
+    margin-right:10px;
+}
+
+.tweet-container{
+    float:left;
+}
