@@ -69,7 +69,7 @@
           :href (str "https://twitter.com/intent/tweet"
                      "?text=@microcritix " (:movie_title movie)
                      "&hashtags=" (str (:movie_hash_tag movie) ",rating"))}
-      (:movie_hash_tag movie)]]
+      (str "#" (:movie_hash_tag movie))]]
     [:span
      {:id (str "movie-rating-" (:movie_id movie))
       :key (str "movie-rating-" (:movie_id movie))}
